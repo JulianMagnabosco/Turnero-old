@@ -9,13 +9,12 @@ cola = list((1,2,3))
 
 #clases
 class Button :
-    def __init__(self, text,  pos, bg="black", act=1):
+    def __init__(self, text,  pos, bg="red"):
         self.x, self.y = pos
         self.font = pygame.font.SysFont("Arial", 20)
-        self.mode = mode
         self.textRaw = text
         self.bg = bg
-        self.pressed = 0
+        self.pressed = False
         self.change(bg)
 
     def change(self, bg="black"):
@@ -28,19 +27,17 @@ class Button :
         self.rect = pygame.Rect(self.x, self.y, self.size[0], self.size[1])
 
     def show(self):
-        if mode == self.mode:
+        if self.pressed:
             self.change(self.bg)
         else:
             self.change()
         screen.blit(self.surface, (self.x, self.y))
 
-    def click(self, event):
-        global mode
-        x, y = pygame.mouse.get_pos()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if pygame.mouse.get_pressed()[0]:
-                if self.rect.collidepoint(x, y):
-                    mode = self.mode
+    def click(self, posX,posY):
+        self.pressed = False
+        if self.rect.collidepoint(posX,posY):
+            self.pressed = True
+        button.show()
 
 #metodos
 def addTicket ():
@@ -50,7 +47,7 @@ def delTurn ():
     cola.pop(0)
 
 def show():
-    print(cola)
+    # print(cola)
     render = font1.render(str(cola[0]), 1, colorF)
     screen.blit(render, (20,20))
     i = 0
@@ -64,9 +61,19 @@ def show():
 addTicket()
 delTurn()
 
+button = Button("Button",(100,100))
+posX = -1
+posY = -1
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if pygame.mouse.get_pressed()[0]:
+                posX,posY = pygame.mouse.get_pos()
+        if event.type == pygame.MOUSEBUTTONUP:
+            posX = -1
+            posY = -1
     screen.fill((0,0,0))
     show()
+    button.click(posX,posY)
     pygame.display.flip()
