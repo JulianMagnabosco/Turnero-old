@@ -9,7 +9,7 @@ cola = list((1,2,3))
 
 #clases
 class Button :
-    def __init__(self, text,  pos, bg="red"):
+    def __init__(self, text,  pos, bg="yellow"):
         self.x, self.y = pos
         self.font = pygame.font.SysFont("Arial", 20)
         self.textRaw = text
@@ -37,14 +37,20 @@ class Button :
         self.pressed = False
         if self.rect.collidepoint(posX,posY):
             self.pressed = True
-        button.show()
+        self.show()
+        return self.pressed
 
 #metodos
 def addTicket ():
     cola.append(cola[-1]+1)
 
-def delTurn ():
-    cola.pop(0)
+def delTicket ():
+    if len(cola) > 1:
+        cola.pop(0)
+
+def resetTicket ():
+    cola.clear()
+    cola.append(1)
 
 def show():
     # print(cola)
@@ -58,22 +64,30 @@ def show():
         screen.blit(render, (20,120+i*50))
         i += 1
 
-addTicket()
-delTurn()
 
-button = Button("Button",(100,100))
-posX = -1
-posY = -1
+buttonAdd = Button("addTicket",(100,100))
+buttonDel = Button("delTurn",(200,100))
+buttonRes = Button("resetTicket",(300,100))
 while True:
+    posX = -1
+    posY = -1
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed()[0]:
                 posX,posY = pygame.mouse.get_pos()
-        if event.type == pygame.MOUSEBUTTONUP:
-            posX = -1
-            posY = -1
+        # if event.type == pygame.MOUSEBUTTONUP:
+        #     posX = -1
+        #     posY = -1
     screen.fill((0,0,0))
     show()
-    button.click(posX,posY)
+    pressedAdd = buttonAdd.click(posX,posY)
+    pressedDel = buttonDel.click(posX,posY)
+    pressedRes = buttonRes.click(posX,posY)
+    if pressedAdd:
+        addTicket()
+    if pressedDel:
+        delTicket()
+    if pressedRes:
+        resetTicket()
     pygame.display.flip()
