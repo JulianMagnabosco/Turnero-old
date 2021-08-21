@@ -64,10 +64,10 @@ def show():
         screen.blit(render, (20,120+i*50))
         i += 1
 
-
-buttonAdd = Button("addTicket",(100,100))
-buttonDel = Button("delTurn",(200,100))
-buttonRes = Button("resetTicket",(300,100))
+posButtons = 450
+buttonAdd = Button("addTicket",(100,posButtons))
+buttonDel = Button("delTurn",(200,posButtons))
+buttonRes = Button("resetTicket",(300,posButtons))
 while True:
     posX = -1
     posY = -1
