@@ -2,7 +2,7 @@ import pygame,sys
 
 from pygame import surface
 flags = pygame.RESIZABLE
-screen = pygame.display.set_mode((500,500), flags)
+screen = pygame.display.set_mode((1024,720), flags)
 pygame.font.init()
 font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
@@ -13,7 +13,7 @@ cola = list((1,2,3))
 #clases
 class Button :
     def __init__(self, text,  pos, action, bg="yellow"):
-        self.font = pygame.font.SysFont("Arial", 20)
+        self.font = font2
         self.textRaw = text
         self.text = self.font.render(self.textRaw, 1, pygame.Color("White"))
         self.size = (self.text.get_size()[0]+10,self.text.get_size()[1]+10)
@@ -64,26 +64,30 @@ def resetTicket ():
 def draw():
     screen.fill((255,255,255))
 
-    pygame.draw.rect(screen, "green", (0,0,screen.get_size()[0],50), border_radius=5)
+    posTop = 120
+    pygame.draw.rect(screen, "green", (0,0,screen.get_size()[0],posTop))
     render = font1.render(str(len(cola)), 1, "white")
-    screen.blit(render, (0,0))
+    screen.blit(render, (screen.get_size()[0] / 2 - render.get_size()[0] / 2,0))
 
     buttonAdd.show()
     buttonDel.show()
     buttonRes.show()
 
+    
     render = font1.render(str(cola[0]), 1, "white")
-    rectFont = (screen.get_size()[0]/4,35,render.get_size()[0],render.get_size()[1]-30)
+    rectFont = (5, posTop + 5, screen.get_size()[0] / 2 - 5, render.get_size()[1])
     pygame.draw.rect(screen, colorBF, rectFont, border_radius=5)
-    screen.blit(render, (screen.get_size()[0]/4,20))
+    screen.blit(render, (screen.get_size()[0] / 4 - render.get_size()[0] / 2, posTop + 5))
+    posRender = posTop + render.get_size()[1]+5
     i = 0
     for n in cola:
         if n == cola[0]:
             continue
         render = font2.render(str(n), 1, "white")
-        rectFont = (screen.get_size()[0]/4+15,125+i*50,render.get_size()[0],render.get_size()[1]-10)
+        rectFont = (5, posRender+5, screen.get_size()[0]/2-5, render.get_size()[1])
         pygame.draw.rect(screen, colorBF, rectFont, border_radius=5)
-        screen.blit(render, (screen.get_size()[0]/4+15,120+i*50))
+        screen.blit(render, (screen.get_size()[0] / 4 - render.get_size()[0] / 2,posRender+5))
+        posRender = posRender + render.get_size()[1]+5
         i += 1
 
 posButtons = 75
