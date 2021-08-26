@@ -1,13 +1,14 @@
 import pygame,sys
-
 from pygame import surface
-import pygame.freetype
+
 flags = pygame.RESIZABLE
 screen = pygame.display.set_mode((1024,720), flags)
 pygame.font.init()
-pygame.freetype.init()
+pygame.mixer.init()
 font1 = pygame.font.SysFont("Arial", 100)
-font2 = pygame.freetype.SysFont("Segoe UI Emoji", 50)
+font2 = pygame.font.SysFont("Arial", 50)
+font3 = pygame.font.SysFont("Arial", 30)
+sound = pygame.mixer.Sound("sonido.mp3")
 colorBF = 0,200,255
 
 cola = list((1,2,3))
@@ -15,29 +16,22 @@ cola = list((1,2,3))
 #clases
 class Button:
     def __init__(self, text, action, bg="yellow"):
-        self.font = font2
+        self.font = font3
         self.textRaw = text
         self.text = self.font.render(self.textRaw, 1, pygame.Color("White"))
-        self.size = (self.text.get_sized_glyph_height()+10,self.text.get_sized_height()+10)
-        self.surface = pygame.Surface(self.size)
+        self.size = (screen.get_size()[0]/3,self.text.get_size()[1]+10)
         self.action = action
         self.pressed = False
         self.bg = bg
-        self.change(bg)
-
-    def change(self, bg="black"):
-        """Change the text when you click"""
-        self.surface.fill(bg)
-        self.surface.blit(self.text, pygame.Rect(5,5,5,5))
 
     def show(self,  x,y):
         self.rect = pygame.Rect(x-  self.size[0]/2, y-  self.size[1]/2, self.size[0], self.size[1])
         if self.pressed:
-            self.change(self.bg)
+            pygame.draw.rect(screen, self.bg, self.rect, border_radius=5)
             self.pressed = False
         else:
-            self.change()
-        screen.blit(self.surface, (x - self.rect[2]/2, y - self.rect[3]/2))
+            pygame.draw.rect(screen, "blue", self.rect, border_radius=5)
+        screen.blit(self.text, (x-self.text.get_size()[0]/2, y-self.text.get_size()[1]/2))
 
     def click(self):
         self.pressed = False
@@ -51,9 +45,13 @@ class Button:
 def addTicket ():
     cola.append(cola[-1]+1)
 
+def callTicket ():
+    pygame
+
 def nextTicket ():
     if len(cola) > 1:
         cola.pop(0)
+        sound.play(maxtime=1)
     
 
 def resetTicket ():
@@ -89,7 +87,7 @@ def draw():
         posRender = posRender + render.get_size()[1]+5
 
 buttons = {
-    Button("asdasd",addTicket),
+    Button("Agregar Turno",addTicket),
     Button("Llamar y quitar",nextTicket),
     Button("Resetear todo",resetTicket)
 }
@@ -98,8 +96,8 @@ while True:
         if event.type == pygame.QUIT: sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed()[0]:
-                buttonAdd.click()
-                buttonNext.click()
-                buttonRes.click()
+                for button in buttons:
+                    button.show(screen.get_size()[0] * 0.75, button.size[1]/2 + posButton+5)
+                    posButton += button.size[1] + 5
     draw()
     pygame.display.flip()
