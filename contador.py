@@ -1,14 +1,14 @@
 import pygame,sys
-from pygame import surface
+from pygame.locals import *
 
+pygame.init()
 flags = pygame.RESIZABLE
 screen = pygame.display.set_mode((1024,720), flags)
-pygame.font.init()
-pygame.mixer.init()
+pygame.display.set_caption("contador")
+sound = pygame.mixer.Sound("music.wav")
 font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
 font3 = pygame.font.SysFont("Arial", 30)
-sound = pygame.mixer.Sound("sonido.mp3")
 colorBF = 0,200,255
 
 cola = list((1,2,3))
@@ -46,12 +46,13 @@ def addTicket ():
     cola.append(cola[-1]+1)
 
 def callTicket ():
-    pygame
+    pygame.mixer.Sound.play(sound)
+    pygame.mixer.music.stop()
 
 def nextTicket ():
     if len(cola) > 1:
         cola.pop(0)
-        sound.play(maxtime=1)
+        callTicket()
     
 
 def resetTicket ():
@@ -97,7 +98,6 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed()[0]:
                 for button in buttons:
-                    button.show(screen.get_size()[0] * 0.75, button.size[1]/2 + posButton+5)
-                    posButton += button.size[1] + 5
+                    button.click()
     draw()
     pygame.display.flip()
