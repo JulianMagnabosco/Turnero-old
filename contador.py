@@ -1,19 +1,30 @@
-import pygame,sys,time
+import pygame,sys,time,pickle
 from pygame.locals import *
 
 startTime = time.time()
-timer = (time.time() - startTime) / 5
 pause = False
+timer = 0
+
 pygame.init()
 flags = pygame.RESIZABLE
 screen = pygame.display.set_mode((1024,720), flags)
 pygame.display.set_caption("contador")
+
+archive = open("config","ab+")
+archive.seek(0)
+config = None
+try:
+    config = pickle.load(archive)
+except:
+    print("error")
+finally:
+    archive.close()
 sound = pygame.mixer.Sound("music.wav")
 font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
 font3 = pygame.font.SysFont("Arial", 30)
-colorBF = 0,200,255
 
+colorBF = 0,200,255
 cola = list((1,2,3))
 
 #clases
@@ -76,15 +87,16 @@ def resetTicket ():
     cola.append(1)
 
 def draw():
-    global startTime, timer
+    global startTime,timer
     screen.fill((255,255,255))
 
     posTop = 120
     pygame.draw.rect(screen, "green", (0,0,screen.get_size()[0],posTop))
-
-    if pause: 
-        timer = (time.time() - startTime) / 5
-    print(timer)
+    if not pause:
+        startTime = time.time() - timer * float(config["timer"])
+    else:
+        timer = (time.time() - startTime) / float(config["timer"])
+    print(config["timer"])
     pygame.draw.rect(screen, "blue", (0,0,screen.get_size()[0]*timer,10))
     
     if timer > 1:
