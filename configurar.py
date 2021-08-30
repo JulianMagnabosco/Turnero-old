@@ -2,7 +2,8 @@ import sys,pickle
 import tkinter as tk
 from tkinter import messagebox
 
-screen = tk.Tk("registro")
+screen = tk.Tk("configurar")
+screen.title('Configurar')
 frameTop = tk.Frame(screen)
 frameBot = tk.Frame(screen)
 frameTop.pack()
@@ -49,8 +50,7 @@ def Update():
 
 #secciones
 configSections = {
-    "timer" : section("Segundos entre llamadas",True),
-    "name" : section("Nombre")
+    "timer" : section("Segundos entre llamadas",True)
 }
 
 config = dict()

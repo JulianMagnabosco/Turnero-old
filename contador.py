@@ -1,9 +1,7 @@
 import pygame,sys,time,pickle
 from pygame.locals import *
 
-startTime = time.time()
-pause = False
-timer = 0
+
 
 pygame.init()
 flags = pygame.RESIZABLE
@@ -24,8 +22,12 @@ font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
 font3 = pygame.font.SysFont("Arial", 30)
 
-colorBF = 0,200,255
-cola = list((1,2,3))
+colaC = list((1,2,3))
+colaP = list((1,2,3))
+colaOB = list((1,2,3))
+colorColaC = 0,200,255
+colorColaP = 0,200,0
+colorColaOB = 255,0,0
 
 #clases
 class Button:
@@ -33,13 +35,13 @@ class Button:
         self.font = font3
         self.textRaw = text
         self.text = self.font.render(self.textRaw, 1, pygame.Color("White"))
-        self.size = (screen.get_size()[0]/3,self.text.get_size()[1]+10)
+        self.size = (screen.get_size()[0]/4,self.text.get_size()[1]+10)
         self.action = action
         self.pressed = False
         self.bg = bg
 
     def show(self,  x,y):
-        self.rect = pygame.Rect(x-  self.size[0]/2, y-  self.size[1]/2, self.size[0], self.size[1])
+        self.rect = pygame.Rect(x-  self.size[0]/2+5, y-  self.size[1]/2, self.size[0]-10, self.size[1])
         if self.pressed:
             pygame.draw.rect(screen, self.bg, self.rect, border_radius=5)
         else:
@@ -59,74 +61,80 @@ class Button:
 
 #metodos
 
-def pause ():
-    global pause
-    pause = not pause
-    
 def addTicket ():
-    if len(cola) > 0:
-        cola.append(cola[-1]+1)
+    if len(colaC) > 0:
+        colaC.append(colaC[-1]+1)
     else:
-        cola.append(1)
+        colaC.append(1)
 
 def callTicket ():
     pygame.mixer.Sound.play(sound)
     pygame.mixer.music.stop()
 
 def nextTicket ():
-    if len(cola) > 0:
-        if len(cola) == 0:
-            cola.clear()
+    if len(colaC) > 0:
+        if len(colaC) == 0:
+            colaC.clear()
         else:
             callTicket()
-        cola.pop(0)
+        colaC.pop(0)
         callTicket()
 
 def resetTicket ():
-    cola.clear()
-    cola.append(1)
+    colaC.clear()
+    colaC.append(1)
 
 def draw():
-    global startTime,timer
     screen.fill((255,255,255))
 
-    posTop = 120
+    posTop = 70
     pygame.draw.rect(screen, "green", (0,0,screen.get_size()[0],posTop))
-    if not pause:
-        startTime = time.time() - timer * float(config["timer"])
-    else:
-        timer = (time.time() - startTime) / float(config["timer"])
-    print(config["timer"])
-    pygame.draw.rect(screen, "blue", (0,0,screen.get_size()[0]*timer,10))
     
-    if timer > 1:
-        startTime = time.time()
-        nextTicket ()
-
-    posButton = posTop + 5
+    posButton = 5
     for button in buttons:
-        button.show(screen.get_size()[0] * 0.75, button.size[1]/2 + posButton)
-        posButton += button.size[1] + 5
+        button.show(posButton+button.size[0]/2, screen.get_size()[1]-button.size[1]-5)
+        posButton += button.size[0] 
     
-    if cola == None:
+    if colaC == None:
         return
-    render = font1.render(str(len(cola)), 1, "white")
+    render = font2.render(str(len(colaC))+" Turnos", 1, "black")
     screen.blit(render, (screen.get_size()[0] / 2 - render.get_size()[0] / 2,0))
-    for n in cola:
-        if n == cola[0]:
+
+    posTopC = posTopP = posTopOB = posTop
+    for n in colaC:
+        if n == colaC[0]:
             render = font1.render(str(n), 1, "white")
         else:
             render = font2.render(str(n), 1, "white")
-        rectFont = (5, posTop+5, screen.get_size()[0]/2-5, render.get_size()[1])
-        pygame.draw.rect(screen, colorBF, rectFont, border_radius=5)
-        screen.blit(render, (screen.get_size()[0] / 4 - render.get_size()[0] / 2,posTop+5))
-        posTop += render.get_size()[1]+5
+        rectFont = (5, posTopC+5, screen.get_size()[0]/4-5, render.get_size()[1])
+        pygame.draw.rect(screen, colorColaC, rectFont, border_radius=5)
+        screen.blit(render, (screen.get_size()[0] / 8 - render.get_size()[0] / 2, posTopC+5))
+        posTopC += render.get_size()[1]+5
+        
+    for n in colaP:
+        if n == colaP[0]:
+            render = font1.render(str(n), 1, "white")
+        else:
+            render = font2.render(str(n), 1, "white")
+        rectFont = (screen.get_size()[0]/4+5, posTopP+5, screen.get_size()[0]/4-5, render.get_size()[1])
+        pygame.draw.rect(screen, colorColaP, rectFont, border_radius=5)
+        screen.blit(render, (screen.get_size()[0] / 8*3 - render.get_size()[0] / 2, posTopP+5))
+        posTopP += render.get_size()[1]+5
+    
+    for n in colaOB:
+        if n == colaOB[0]:
+            render = font1.render(str(n), 1, "white")
+        else:
+            render = font2.render(str(n), 1, "white")
+        rectFont = (screen.get_size()[0]/2+5, posTopOB+5, screen.get_size()[0]/4-5, render.get_size()[1])
+        pygame.draw.rect(screen, colorColaOB, rectFont, border_radius=5)
+        screen.blit(render, (screen.get_size()[0] / 8*5 - render.get_size()[0] / 2, posTopOB+5))
+        posTopOB += render.get_size()[1]+5
 
 buttons = {
-    Button("Llamar y quitar",nextTicket),
-    Button("Resetear todo",resetTicket),
-    Button("Pausar",pause),
-    Button("Agregar Turno",addTicket)
+    Button("Dar Turno C",addTicket),
+    Button("Dar Turno P",addTicket),
+    Button("Dar Turno OB",addTicket)
 }
 
 while True:
