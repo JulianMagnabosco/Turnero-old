@@ -31,12 +31,13 @@ colorColaOB = 255,0,0
 
 #clases
 class Button:
-    def __init__(self, text, action, bg="yellow"):
+    def __init__(self, text, action, parameter, bg="yellow"):
         self.font = font3
         self.textRaw = text
         self.text = self.font.render(self.textRaw, 1, pygame.Color("White"))
         self.size = (screen.get_size()[0]/4,self.text.get_size()[1]+10)
         self.action = action
+        self.parameter = parameter
         self.pressed = False
         self.bg = bg
 
@@ -54,18 +55,29 @@ class Button:
 
         if self.rect.collidepoint(posX,posY):
             self.pressed = True
-            self.action()
+            self.action(self.parameter)
     def clickup(self):
         print("asd")
         self.pressed = False
 
 #metodos
 
-def addTicket ():
-    if len(colaC) > 0:
-        colaC.append(colaC[-1]+1)
+def addTicket (listN):
+    if listN == 1:
+        if len(colaC) > 0:
+            colaC.append(colaC[-1]+1)
+        else:
+            colaC.append(1)
+    elif listN == 2:
+        if len(colaP) > 0:
+            colaP.append(colaP[-1]+1)
+        else:
+            colaP.append(1)
     else:
-        colaC.append(1)
+        if len(colaOB) > 0:
+            colaOB.append(colaOB[-1]+1)
+        else:
+            colaOB.append(1)
 
 def callTicket ():
     pygame.mixer.Sound.play(sound)
@@ -132,9 +144,9 @@ def draw():
         posTopOB += render.get_size()[1]+5
 
 buttons = {
-    Button("Dar Turno C",addTicket),
-    Button("Dar Turno P",addTicket),
-    Button("Dar Turno OB",addTicket)
+    Button("Dar Turno C",addTicket, 1),
+    Button("Dar Turno P",addTicket, 2),
+    Button("Dar Turno OB",addTicket, 3)
 }
 
 while True:
