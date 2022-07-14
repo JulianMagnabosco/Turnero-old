@@ -1,22 +1,12 @@
-import pygame,sys,time,pickle
+import pygame,sys,pickle
 from pygame.locals import *
-
-
 
 pygame.init()
 flags = pygame.RESIZABLE
 screen = pygame.display.set_mode((1024,720), flags)
 pygame.display.set_caption("contador")
 
-archive = open("config","ab+")
-archive.seek(0)
-config = None
-try:
-    config = pickle.load(archive)
-except:
-    print("error")
-finally:
-    archive.close()
+
 sound = pygame.mixer.Sound("music.wav")
 font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
@@ -28,56 +18,104 @@ colaOB = list((1,2,3))
 colorColaC = 0,200,255
 colorColaP = 0,200,0
 colorColaOB = 255,0,0
+archive = open("list","ab+")
+try:
+    archive.seek(0)
+    colaC = pickle.load(archive)
+    colaP = pickle.load(archive)
+    colaOB = pickle.load(archive)
+except:
+    print("error")
+finally:
+    archive.close()
+
+def cargar():
+    archive = open("list","wb")
+    try:
+        pickle.dump(colaC,archive)
+        pickle.dump(colaP,archive)
+        pickle.dump(colaOB,archive)
+    except:
+        print("error")
+    finally:
+        archive.close()
+
+buttons = list()
 
 #clases
 class Button:
     def __init__(self, text, action, parameter, bg="yellow"):
         self.font = font3
-        self.textRaw = text
-        self.text = self.font.render(self.textRaw, 1, pygame.Color("White"))
-        self.size = (screen.get_size()[0]/4,self.text.get_size()[1]+10)
+        self.text = self.font.render(text, 1, pygame.Color("White"))
         self.action = action
         self.parameter = parameter
         self.pressed = False
         self.bg = bg
 
     def show(self,  x,y):
-        self.rect = pygame.Rect(x-  self.size[0]/2+5, y-  self.size[1]/2, self.size[0]-10, self.size[1])
+        self.rect = pygame.Rect(x, y, screen.get_size()[0]/4-10,self.text.get_size()[1]+10)
         if self.pressed:
             pygame.draw.rect(screen, self.bg, self.rect, border_radius=5)
         else:
             pygame.draw.rect(screen, "blue", self.rect, border_radius=5)
-        screen.blit(self.text, (x-self.text.get_size()[0]/2, y-self.text.get_size()[1]/2))
+        screen.blit(self.text, (x+screen.get_size()[0]/8-self.text.get_size()[0]/2, y))
 
     def clickdown(self):
-        self.pressed = False
         posX,posY = pygame.mouse.get_pos()
-
-        if self.rect.collidepoint(posX,posY):
+        if self.rect.collidepoint(posX,posY) and self.pressed != True:
             self.pressed = True
             self.action(self.parameter)
+
     def clickup(self):
-        print("asd")
         self.pressed = False
 
+
+def addTicket (cola):
+    if len(cola) > 0:
+        cola.append(cola[-1]+1)
+    else:
+        cola.append(1)
+
+def delTicket (cola):
+    if len(cola) > 0:
+        cola.pop(0)
+
+class Cola:
+    def __init__(self, cola, pos, color):
+        self.cola = cola
+        self.pos = pos
+        self.color = color
+        self.buttonAdd = Button("Dar ticket",addTicket,cola)
+        buttons.append(self.buttonAdd)
+        self.buttonDel = Button("Quitar ticket",delTicket,cola)
+        buttons.append(self.buttonDel)
+
+    def show(self):
+        if self.cola == None:
+            return
+        render = font2.render(str(len(self.cola))+" Turnos", 1, "black")
+        realPos = self.pos*screen.get_size()[0]/4
+        screen.blit(render, (realPos + (screen.get_size()[0]/4-render.get_size()[0])/2 ,0))
+
+        postop = 70
+        for n in self.cola:
+            if n == self.cola[0]:
+                render = font1.render(str(n), 1, "white")
+            else:
+                render = font2.render(str(n), 1, "white")
+            rectFont = (realPos+5, postop+5, screen.get_size()[0]/4-5, render.get_size()[1])
+            pygame.draw.rect(screen, self.color, rectFont, border_radius=5)
+            screen.blit(render, (realPos + (screen.get_size()[0]/4-render.get_size()[0])/2, postop+5))
+            postop += render.get_size()[1]+5
+    
+        self.buttonAdd.show(5+realPos, screen.get_size()[1]-render.get_size()[1]*2)
+        self.buttonDel.show(5+realPos, screen.get_size()[1]-render.get_size()[1])
 #metodos
 
-def addTicket (listN):
-    if listN == 1:
-        if len(colaC) > 0:
-            colaC.append(colaC[-1]+1)
-        else:
-            colaC.append(1)
-    elif listN == 2:
-        if len(colaP) > 0:
-            colaP.append(colaP[-1]+1)
-        else:
-            colaP.append(1)
-    else:
-        if len(colaOB) > 0:
-            colaOB.append(colaOB[-1]+1)
-        else:
-            colaOB.append(1)
+cola1 = Cola(colaC,0,colorColaC)
+cola2 = Cola(colaP,1,colorColaP)
+cola3 = Cola(colaOB,2,colorColaOB)
+
 
 def callTicket ():
     pygame.mixer.Sound.play(sound)
@@ -99,59 +137,19 @@ def resetTicket ():
 def draw():
     screen.fill((255,255,255))
 
-    posTop = 70
-    pygame.draw.rect(screen, "green", (0,0,screen.get_size()[0],posTop))
+    pygame.draw.rect(screen, "green", (0,0,screen.get_size()[0],70))
     
-    posButton = 5
-    for button in buttons:
-        button.show(posButton+button.size[0]/2, screen.get_size()[1]-button.size[1]-5)
-        posButton += button.size[0] 
+    cola1.show()
     
-    if colaC == None:
-        return
-    render = font2.render(str(len(colaC))+" Turnos", 1, "black")
-    screen.blit(render, (screen.get_size()[0] / 2 - render.get_size()[0] / 2,0))
-
-    posTopC = posTopP = posTopOB = posTop
-    for n in colaC:
-        if n == colaC[0]:
-            render = font1.render(str(n), 1, "white")
-        else:
-            render = font2.render(str(n), 1, "white")
-        rectFont = (5, posTopC+5, screen.get_size()[0]/4-5, render.get_size()[1])
-        pygame.draw.rect(screen, colorColaC, rectFont, border_radius=5)
-        screen.blit(render, (screen.get_size()[0] / 8 - render.get_size()[0] / 2, posTopC+5))
-        posTopC += render.get_size()[1]+5
-        
-    for n in colaP:
-        if n == colaP[0]:
-            render = font1.render(str(n), 1, "white")
-        else:
-            render = font2.render(str(n), 1, "white")
-        rectFont = (screen.get_size()[0]/4+5, posTopP+5, screen.get_size()[0]/4-5, render.get_size()[1])
-        pygame.draw.rect(screen, colorColaP, rectFont, border_radius=5)
-        screen.blit(render, (screen.get_size()[0] / 8*3 - render.get_size()[0] / 2, posTopP+5))
-        posTopP += render.get_size()[1]+5
+    cola2.show()
     
-    for n in colaOB:
-        if n == colaOB[0]:
-            render = font1.render(str(n), 1, "white")
-        else:
-            render = font2.render(str(n), 1, "white")
-        rectFont = (screen.get_size()[0]/2+5, posTopOB+5, screen.get_size()[0]/4-5, render.get_size()[1])
-        pygame.draw.rect(screen, colorColaOB, rectFont, border_radius=5)
-        screen.blit(render, (screen.get_size()[0] / 8*5 - render.get_size()[0] / 2, posTopOB+5))
-        posTopOB += render.get_size()[1]+5
-
-buttons = {
-    Button("Dar Turno C",addTicket, 1),
-    Button("Dar Turno P",addTicket, 2),
-    Button("Dar Turno OB",addTicket, 3)
-}
+    cola3.show()
 
 while True:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.QUIT: 
+            cargar()
+            sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed()[0]:
                 for button in buttons:
