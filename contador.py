@@ -1,11 +1,10 @@
-import pygame,sys,pickle
+import pygame,sys,pickle,threading
 from pygame.locals import *
 
 pygame.init()
 flags = pygame.RESIZABLE
 screen = pygame.display.set_mode((1024,720), flags)
 pygame.display.set_caption("contador")
-
 
 sound = pygame.mixer.Sound("music.wav")
 font1 = pygame.font.SysFont("Arial", 100)
@@ -15,9 +14,6 @@ font3 = pygame.font.SysFont("Arial", 30)
 colaC = list((1,2,3))
 colaP = list((1,2,3))
 colaOB = list((1,2,3))
-colorColaC = 0,200,255
-colorColaP = 0,200,0
-colorColaOB = 255,0,0
 archive = open("list","ab+")
 try:
     archive.seek(0)
@@ -77,8 +73,13 @@ def addTicket (cola):
         cola.append(1)
 
 def delTicket (cola):
-    if len(cola) > 0:
-        cola.pop(0)
+    cola.pop(len(cola)-1)
+
+def callTicket (cola):
+    timer = threading.Timer(5,delTicket,[cola])
+    timer.start()
+    pygame.mixer.Sound.play(sound)
+    pygame.mixer.music.stop()
 
 class Cola:
     def __init__(self, cola, pos, color):
@@ -89,13 +90,15 @@ class Cola:
         buttons.append(self.buttonAdd)
         self.buttonDel = Button("Quitar ticket",delTicket,cola)
         buttons.append(self.buttonDel)
+        self.buttonCall = Button("Llamar ticket",callTicket,cola)
+        buttons.append(self.buttonCall)
 
     def show(self):
         if self.cola == None:
             return
-        render = font2.render(str(len(self.cola))+" Turnos", 1, "black")
+        firstRender = font2.render(str(len(self.cola))+" Turnos", 1, "black")
         realPos = self.pos*screen.get_size()[0]/4
-        screen.blit(render, (realPos + (screen.get_size()[0]/4-render.get_size()[0])/2 ,0))
+        screen.blit(firstRender, (realPos + (screen.get_size()[0]/4-firstRender.get_size()[0])/2 ,0))
 
         postop = 70
         for n in self.cola:
@@ -108,42 +111,23 @@ class Cola:
             screen.blit(render, (realPos + (screen.get_size()[0]/4-render.get_size()[0])/2, postop+5))
             postop += render.get_size()[1]+5
     
-        self.buttonAdd.show(5+realPos, screen.get_size()[1]-render.get_size()[1]*2)
-        self.buttonDel.show(5+realPos, screen.get_size()[1]-render.get_size()[1])
+        self.buttonAdd.show(5+realPos, screen.get_size()[1]-firstRender.get_size()[1]*3)
+        self.buttonDel.show(5+realPos, screen.get_size()[1]-firstRender.get_size()[1]*2)
+        self.buttonCall.show(5+realPos, screen.get_size()[1]-firstRender.get_size()[1])
+
 #metodos
 
-cola1 = Cola(colaC,0,colorColaC)
-cola2 = Cola(colaP,1,colorColaP)
-cola3 = Cola(colaOB,2,colorColaOB)
-
-
-def callTicket ():
-    pygame.mixer.Sound.play(sound)
-    pygame.mixer.music.stop()
-
-def nextTicket ():
-    if len(colaC) > 0:
-        if len(colaC) == 0:
-            colaC.clear()
-        else:
-            callTicket()
-        colaC.pop(0)
-        callTicket()
-
-def resetTicket ():
-    colaC.clear()
-    colaC.append(1)
+colas = (Cola(colaC,0,(0,200,255)),
+Cola(colaP,1,(0,200,0)),
+Cola(colaOB,2,(255,0,0)))
 
 def draw():
     screen.fill((255,255,255))
 
     pygame.draw.rect(screen, "green", (0,0,screen.get_size()[0],70))
     
-    cola1.show()
-    
-    cola2.show()
-    
-    cola3.show()
+    for c in colas:
+        c.show()
 
 while True:
     for event in pygame.event.get():
