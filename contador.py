@@ -1,4 +1,5 @@
 import pygame,sys,pickle,threading
+from conexion import ConectionServer
 from pygame.locals import *
 
 pygame.init()
