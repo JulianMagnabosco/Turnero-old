@@ -9,12 +9,16 @@ class ConectionServer:
         self.ADDRESS = "0.0.0.0"
         self.broadcast_list = []
         self.my_socket.bind((self.ADDRESS, self.PORT))
-    def accept_loop(self):
-        while True:
-            self.my_socket.listen()
+        self.my_socket.setblocking(False)
+
+    def loop(self):
+        self.my_socket.listen()
+        try:
             self.client, self.client_address = self.my_socket.accept()
             self.broadcast_list.append(self.client)
             self.start_listenning_thread(self.client)
+        except:
+            pass
         
     def start_listenning_thread(self,client):
         self.client_thread = threading.Thread(
@@ -25,8 +29,12 @@ class ConectionServer:
     
     def listen_thread(self,client):
         name = ""
+        message = None
         while True:
-            message = client.recv(1024).decode()
+            try:
+                message = client.recv(1024).decode()
+            except:
+                print("error")
             if message:
                 if str(message).rfind('@') >= 0:
                     print(f"New client: {str(message).removeprefix('@')}")
@@ -55,6 +63,7 @@ class ConectionClient:
         self.host = "localhost" # "127.0.1.1"
         self.port = 8000
         self.my_socket.connect((self.host, self.port))
+        self.my_socket.setblocking(False)
         self.my_socket.send(f'@{self.nickname}'.encode())
         self.send_closed = False
     
@@ -65,7 +74,7 @@ class ConectionClient:
         thread_receive.start()
 
     def thread_sending(self):
-        global send_closed
+        self.send_closed
         while True:
             message_to_send = input()
             if message_to_send == 'close':
@@ -77,7 +86,7 @@ class ConectionClient:
                 self.my_socket.send(message_with_nickname.encode())
         
     def thread_receiving(self):
-        while send_closed:
+        while self.send_closed:
             message = self.my_socket.recv(1024).decode()
             print(message)
         

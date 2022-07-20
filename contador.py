@@ -16,6 +16,8 @@ colaC = list((1,2,3))
 colaP = list((1,2,3))
 colaOB = list((1,2,3))
 archive = open("list","ab+")
+conexion = ConectionServer()
+
 try:
     archive.seek(0)
     colaC = pickle.load(archive)
@@ -114,7 +116,12 @@ def draw():
     for c in colas:
         c.show()
 
+
+introScreen = font2.render("Esperando a que se conecten clientes", 1, "white")
+screen.blit(introScreen, (400,400))
+pygame.display.flip()
 while True:
+    conexion.loop()
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             cargar()
