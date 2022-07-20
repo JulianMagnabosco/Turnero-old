@@ -9,16 +9,19 @@ class ConectionServer:
         self.ADDRESS = "0.0.0.0"
         self.broadcast_list = []
         self.my_socket.bind((self.ADDRESS, self.PORT))
-        self.my_socket.setblocking(False)
+        # self.my_socket.setblocking(False)
 
     def loop(self):
         self.my_socket.listen()
-        try:
-            self.client, self.client_address = self.my_socket.accept()
-            self.broadcast_list.append(self.client)
-            self.start_listenning_thread(self.client)
-        except:
-            pass
+        self.client, self.client_address = self.my_socket.accept()
+        self.broadcast_list.append(self.client)
+        self.start_listenning_thread(self.client)
+        # try:
+        #     self.client, self.client_address = self.my_socket.accept()
+        #     self.broadcast_list.append(self.client)
+        #     self.start_listenning_thread(self.client)
+        # except:
+        #     pass
         
     def start_listenning_thread(self,client):
         self.client_thread = threading.Thread(
@@ -29,18 +32,14 @@ class ConectionServer:
     
     def listen_thread(self,client):
         name = ""
-        message = None
         while True:
-            try:
-                message = client.recv(1024).decode()
-            except:
-                print("error")
+            message = client.recv(1024).decode()
             if message:
                 if str(message).rfind('@') >= 0:
                     print(f"New client: {str(message).removeprefix('@')}")
                     name = str(message).removeprefix('@')
                 else: 
-                    print(f"Received message : {message}")
+                    print(f"Message : {message}")
                     self.broadcast(message)
             else:
                 print(f"client has been disconnected : {name}")
@@ -63,7 +62,6 @@ class ConectionClient:
         self.host = "localhost" # "127.0.1.1"
         self.port = 8000
         self.my_socket.connect((self.host, self.port))
-        self.my_socket.setblocking(False)
         self.my_socket.send(f'@{self.nickname}'.encode())
         self.send_closed = False
     
