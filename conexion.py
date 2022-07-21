@@ -1,5 +1,6 @@
 from select import select
 import socket
+import sys
 import threading
 
 class ConectionServer:
@@ -9,13 +10,13 @@ class ConectionServer:
         self.ADDRESS = "0.0.0.0"
         self.broadcast_list = []
         self.my_socket.bind((self.ADDRESS, self.PORT))
-        # self.my_socket.setblocking(False)
 
-    def loop(self):
+    def loop(self, data):
         self.my_socket.listen()
-        self.client, self.client_address = self.my_socket.accept()
-        self.broadcast_list.append(self.client)
-        self.start_listenning_thread(self.client)
+        client, client_address = self.my_socket.accept()
+        self.broadcast_list.append(client)
+        client.send(data.encode())
+        self.start_listenning_thread(client)
         # try:
         #     self.client, self.client_address = self.my_socket.accept()
         #     self.broadcast_list.append(self.client)
@@ -52,40 +53,20 @@ class ConectionServer:
             except:
                 self.broadcast_list.remove(client)
                 print(f"Client removed : {client}")
+                
 
 class ConectionClient:
     def __init__(self):
-        self.nickname = input("Choose your nickname : ").strip()
-        while not self.nickname:
-            self.nickname = input("Your nickname should not be empty : ").strip()
+        self.nickname = "local"
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = "localhost" # "127.0.1.1"
         self.port = 8000
         self.my_socket.connect((self.host, self.port))
+        self.data = self.my_socket.recv(1024).decode()
         self.my_socket.send(f'@{self.nickname}'.encode())
-        self.send_closed = False
-    
-    def start(self):
-        thread_send = threading.Thread(target=self.thread_sending)
-        thread_receive = threading.Thread(target=self.thread_receiving)
-        thread_send.start()
-        thread_receive.start()
 
-    def thread_sending(self):
-        self.send_closed
-        while True:
-            message_to_send = input()
-            if message_to_send == 'close':
-                self.my_socket.close()
-                send_closed = False
-                break
-            if message_to_send:
-                message_with_nickname = self.nickname + " : " + message_to_send
-                self.my_socket.send(message_with_nickname.encode())
-        
-    def thread_receiving(self):
-        while self.send_closed:
-            message = self.my_socket.recv(1024).decode()
-            print(message)
+    def send(self,message):
+        self.my_socket.send(message.encode())
+        return self.my_socket.recv(1024).decode()
         
 

@@ -121,7 +121,9 @@ introScreen = font2.render("Esperando a que se conecten clientes", 1, "white")
 screen.blit(introScreen, (400,400))
 pygame.display.flip()
 while True:
-    conexion.loop()
+    conexion.loop(str(colaC)+str(colaP)+str(colaOB))
+    if len(conexion.broadcast_list)-1 <= 0:
+        sys.exit()
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             cargar()

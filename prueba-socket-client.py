@@ -15,7 +15,7 @@ send_closed = False
 def thread_sending():
     global send_closed
     while True:
-        message_to_send = input()
+        message_to_send = "no mesasgee"
         if message_to_send == 'close':
             my_socket.close()
             send_closed = False

@@ -1,4 +1,4 @@
-import pygame,sys,pickle,threading
+import pygame,sys,pickle,threading,conexion
 from pygame.locals import *
 
 pygame.init()
@@ -14,28 +14,13 @@ font3 = pygame.font.SysFont("Arial", 30)
 colaC = list((1,2,3))
 colaP = list((1,2,3))
 colaOB = list((1,2,3))
-archive = open("list","ab+")
-try:
-    archive.seek(0)
-    colaC = pickle.load(archive)
-    colaP = pickle.load(archive)
-    colaOB = pickle.load(archive)
-except:
-    print("error")
-finally:
-    archive.close()
-
-def cargar():
-    archive = open("list","wb")
-    try:
-        pickle.dump(colaC,archive)
-        pickle.dump(colaP,archive)
-        pickle.dump(colaOB,archive)
-    except:
-        print("error")
-    finally:
-        archive.close()
-
+conn = conexion.ConectionClient()
+print(conn.data[1:-1])
+dataRaw = list()
+for data in conn.data[1:-1].split(']['):
+    dataRaw.append(data.strip('][').split(', '))
+    print(data)
+colaC = conv
 
 #clases
 class Button:
@@ -150,7 +135,6 @@ def draw():
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
-            cargar()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pressed()[0]:
