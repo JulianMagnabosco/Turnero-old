@@ -11,17 +11,20 @@ font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
 font3 = pygame.font.SysFont("Arial", 30)
 
-colaC = list((1,2,3))
-colaP = list((1,2,3))
-colaOB = list((1,2,3))
 conn = conexion.ConectionClient()
 print(conn.data[1:-1])
 dataRaw = list()
 for data in conn.data[1:-1].split(']['):
-    dataRaw.append(data.strip('][').split(', '))
-    print(data)
-colaC = conv
+    value = data.strip('][').split(', ')
+    try:
+        dataRaw.append([int(x) for x in value])
+    except:
+        dataRaw.append([])
+print(dataRaw)
 
+colaC = list(dataRaw[0])
+colaP = list(dataRaw[1])
+colaOB = list(dataRaw[2])
 #clases
 class Button:
     def __init__(self, text, action, bg="yellow"):
