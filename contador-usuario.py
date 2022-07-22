@@ -12,7 +12,6 @@ font2 = pygame.font.SysFont("Arial", 50)
 font3 = pygame.font.SysFont("Arial", 30)
 
 conn = conexion.ConectionClient()
-print(conn.data[1:-1])
 dataRaw = list()
 for data in conn.data[1:-1].split(']['):
     value = data.strip('][').split(', ')
@@ -20,17 +19,17 @@ for data in conn.data[1:-1].split(']['):
         dataRaw.append([int(x) for x in value])
     except:
         dataRaw.append([])
-print(dataRaw)
 
 colaC = list(dataRaw[0])
 colaP = list(dataRaw[1])
 colaOB = list(dataRaw[2])
 #clases
 class Button:
-    def __init__(self, text, action, bg="yellow"):
+    def __init__(self, text, action, arg, bg="yellow"):
         self.font = font3
         self.text = self.font.render(text, 1, pygame.Color("White"))
         self.action = action
+        self.arg = arg
         self.pressed = False
         self.bg = bg
 
@@ -46,7 +45,7 @@ class Button:
         posX,posY = pygame.mouse.get_pos()
         if self.rect.collidepoint(posX,posY) and self.pressed != True:
             self.pressed = True
-            self.action()
+            self.action(self.arg)
 
     def clickup(self):
         self.pressed = False
@@ -61,11 +60,11 @@ class Cola:
             self.cola = colaP
         elif cola == "OB":
             self.cola = colaOB
-        self.buttonAdd = Button("Dar ticket",self.addTicket)
+        self.buttonAdd = Button("Dar ticket",self.addTicket,cola)
         buttons.append(self.buttonAdd)
-        self.buttonDel = Button("Quitar ticket",self.delTicket)
+        self.buttonDel = Button("Quitar ticket",self.delTicket,cola)
         buttons.append(self.buttonDel)
-        self.buttonCall = Button("Llamar ticket",self.callTicket)
+        self.buttonCall = Button("Llamar ticket",self.callTicket,cola)
         buttons.append(self.buttonCall)
         self.called = False
 
@@ -102,22 +101,26 @@ class Cola:
         self.buttonDel.show(5+realPos, screen.get_size()[1]-firstRender.get_size()[1]*2)
         self.buttonCall.show(5+realPos, screen.get_size()[1]-firstRender.get_size()[1])
 
-    def addTicket (self):
-        self.cola.append(self.cola[-1]+1)
+    def addTicket (self,nomCola):
+        if len(self.cola) > 0:
+            self.cola.append(self.cola[-1]+1)
+            conn.send("0"+nomCola)
 
-    def delTicket (self):
+    def delTicket (self,nomCola):
         if len(self.cola) > 0:
             self.cola.pop(len(self.cola)-1)
+            conn.send("1"+nomCola)
 
     def _callTicket (self):
         self.cola.pop(0)
         self.called -= 1
     
-    def callTicket (self):
+    def callTicket (self,nomCola):
         if len(self.cola) > 0:
             self.called += 1
             timer = threading.Timer(5,self._callTicket)
             timer.start()
+            conn.send("0"+nomCola)
             pygame.mixer.stop()
             pygame.mixer.Sound.play(sound)
 #metodos

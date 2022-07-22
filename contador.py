@@ -122,8 +122,10 @@ screen.blit(introScreen, (400,400))
 pygame.display.flip()
 while True:
     conexion.loop(str(colaC)+str(colaP)+str(colaOB))
-    if len(conexion.broadcast_list)-1 <= 0:
-        sys.exit()
+    for message in conexion.message_list:
+        print(message)
+    # if len(conexion.broadcast_list)-1 <= 0:
+    #     sys.exit()
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             cargar()
