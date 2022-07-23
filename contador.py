@@ -122,13 +122,33 @@ screen.blit(introScreen, (400,400))
 pygame.display.flip()
 while True:
     conexion.loop(str(colaC)+str(colaP)+str(colaOB))
+
+    for client in conexion.broadcast_list:
+        conexion._listen_thread(client)
+    
     for message in conexion.message_list:
-        print(message)
-    # if len(conexion.broadcast_list)-1 <= 0:
-    #     sys.exit()
+        colaALlamar = None
+        if message[1:] == "C":
+            colaALlamar = colas[0]
+        elif message[1:] == "P":
+            colaALlamar = colas[1]
+        else:
+            colaALlamar = colas[2]
+
+        if message[0] == "0":
+            colaALlamar.addTicket()
+        elif message[0] == "0":
+            colaALlamar.delTicket()
+        else:
+            colaALlamar.callTicket()
+        conexion.message_list.remove(message)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             cargar()
             sys.exit()
+    
+    # if len(conexion.broadcast_list) <= 0:
+    #     sys.exit()
     draw()
     pygame.display.flip()

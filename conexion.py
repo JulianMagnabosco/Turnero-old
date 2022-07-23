@@ -1,3 +1,4 @@
+from concurrent.futures import thread
 from select import select
 import socket
 import sys
@@ -16,11 +17,19 @@ class ConectionServer:
         # self.action2 = action2
 
     def loop(self, data):
+        threadLoop = threading.Thread(
+                target=self._loop,
+                args=(data,))
+        threadLoop.start()
+
+
+    def _loop(self, data):
         self.my_socket.listen()
         client, client_address = self.my_socket.accept()
         self.broadcast_list.append(client)
         client.send(data.encode())
-        self.start_listenning_thread(client)
+        print("serchin")
+        # self.start_listenning_thread(client)
         # try:
         #     self.client, self.client_address = self.my_socket.accept()
         #     self.broadcast_list.append(self.client)
@@ -36,26 +45,30 @@ class ConectionServer:
         self.client_thread.start()
     
     def listen_thread(self,client):
+        while True:
+            self._listen_thread(client)
+    
+    def _listen_thread(self,client):
         name = ""
-        if True:
-            message = client.recv(1024).decode()
-            if message:
-                if str(message).rfind('@') >= 0:
-                    print(f"New client: {str(message).removeprefix('@')}")
-                    name = str(message).removeprefix('@')
-                else: 
-                    self.message_list.append(message)
-                    print(self.message_list)
+        message = client.recv(1024).decode()
+        if message:
+            if str(message).rfind('@') >= 0:
+                print(f"New client: {str(message).removeprefix('@')}")
+                name = str(message).removeprefix('@')
+            else: 
+                self.message_list.append(message)
+                print(self.message_list)
                     # if str(message).rfind('0') >= 0:
                     #     self.action0(str(message).removeprefix('0'))
                     # if str(message).rfind('1') >= 0:
                     #     self.action1(str(message).removeprefix('1'))
                     # if str(message).rfind('2') >= 0:
                     #     self.action2(str(message).removeprefix('2'))
-                    self.broadcast(message)
-            else:
-                print(f"client has been disconnected : {name}")
-                return
+                self.broadcast(message)
+        else:
+            print(f"client has been disconnected : {name}")
+            self.broadcast(client)
+            return
         
     def broadcast(self,message):
         for client in self.broadcast_list:
