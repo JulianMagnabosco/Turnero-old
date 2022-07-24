@@ -13,6 +13,7 @@ font3 = pygame.font.SysFont("Arial", 30)
 
 conn = conexion.ConectionClient()
 dataRaw = list()
+tasks = list()
 for data in conn.data[1:-1].split(']['):
     value = data.strip('][').split(', ')
     try:
@@ -20,6 +21,7 @@ for data in conn.data[1:-1].split(']['):
     except:
         dataRaw.append([])
 
+print(conn.data)
 colaC = list(dataRaw[0])
 colaP = list(dataRaw[1])
 colaOB = list(dataRaw[2])
@@ -104,12 +106,12 @@ class Cola:
     def addTicket (self,nomCola):
         if len(self.cola) > 0:
             self.cola.append(self.cola[-1]+1)
-            conn.send("0"+nomCola)
+            tasks.append("0"+nomCola)
 
     def delTicket (self,nomCola):
         if len(self.cola) > 0:
             self.cola.pop(len(self.cola)-1)
-            conn.send("1"+nomCola)
+            tasks.append("1"+nomCola)
 
     def _callTicket (self):
         self.cola.pop(0)
@@ -120,7 +122,7 @@ class Cola:
             self.called += 1
             timer = threading.Timer(5,self._callTicket)
             timer.start()
-            conn.send("0"+nomCola)
+            tasks.append("3"+nomCola)
             pygame.mixer.stop()
             pygame.mixer.Sound.play(sound)
 #metodos
@@ -139,6 +141,8 @@ def draw():
         c.show()
 
 while True:
+    print(conn.send(str(tasks)))
+    tasks.clear()
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             sys.exit()

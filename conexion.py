@@ -5,22 +5,22 @@ import sys
 import threading
 
 class ConectionServer:
-    def __init__(self):
+    def __init__(self, update):
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.PORT = 8000
         self.ADDRESS = "0.0.0.0"
         self.broadcast_list = []
         self.my_socket.bind((self.ADDRESS, self.PORT))
         self.message_list = []
+        self.update = update
+        self.alive = True
         # self.action0 = action0
         # self.action1 = action1
         # self.action2 = action2
 
     def loop(self, data):
-        threadLoop = threading.Thread(
-                target=self._loop,
-                args=(data,))
-        threadLoop.start()
+        while self.alive:
+            self._loop(data)
 
 
     def _loop(self, data):
@@ -29,7 +29,7 @@ class ConectionServer:
         self.broadcast_list.append(client)
         client.send(data.encode())
         print("serchin")
-        # self.start_listenning_thread(client)
+        self.start_listenning_thread(client)
         # try:
         #     self.client, self.client_address = self.my_socket.accept()
         #     self.broadcast_list.append(self.client)
@@ -44,20 +44,19 @@ class ConectionServer:
         )
         self.client_thread.start()
     
+
     def listen_thread(self,client):
-        while True:
-            self._listen_thread(client)
-    
-    def _listen_thread(self,client):
         name = ""
-        message = client.recv(1024).decode()
-        if message:
-            if str(message).rfind('@') >= 0:
-                print(f"New client: {str(message).removeprefix('@')}")
-                name = str(message).removeprefix('@')
-            else: 
-                self.message_list.append(message)
-                print(self.message_list)
+        while self.alive:
+            message = client.recv(1024).decode()
+            if message:
+                if str(message).rfind('@') >= 0:
+                    print(f"New client: {str(message).removeprefix('@')}")
+                    name = str(message).removeprefix('@')
+                else: 
+                    self.message_list.append(message)
+                    self.update(message)
+                    #print(self.message_list)
                     # if str(message).rfind('0') >= 0:
                     #     self.action0(str(message).removeprefix('0'))
                     # if str(message).rfind('1') >= 0:
@@ -65,10 +64,10 @@ class ConectionServer:
                     # if str(message).rfind('2') >= 0:
                     #     self.action2(str(message).removeprefix('2'))
                 self.broadcast(message)
-        else:
-            print(f"client has been disconnected : {name}")
-            self.broadcast(client)
-            return
+            else:
+                print(f"client has been disconnected : {name}")
+                self.broadcast(client)
+                return
         
     def broadcast(self,message):
         for client in self.broadcast_list:
@@ -77,6 +76,9 @@ class ConectionServer:
             except:
                 self.broadcast_list.remove(client)
                 print(f"Client removed : {client}")
+        if len(self.broadcast_list) <= 0:
+            self.alive = False
+            self.my_socket.close()
                 
 
 class ConectionClient:

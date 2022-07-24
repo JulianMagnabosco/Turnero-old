@@ -16,7 +16,6 @@ colaC = list((1,2,3))
 colaP = list((1,2,3))
 colaOB = list((1,2,3))
 archive = open("list","ab+")
-conexion = ConectionServer()
 
 try:
     archive.seek(0)
@@ -108,47 +107,23 @@ colas = (Cola("C", 0, (0,155,200)),
 Cola("P", 1, (0,155,0)),
 Cola("OB", 2, (155,0,0)))
 
-def draw():
+
+def update():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: 
+            cargar()
+            sys.exit()
     screen.fill((255,255,255))
 
     pygame.draw.rect(screen, (200,200,200), (0,0,screen.get_size()[0],100))
     
     for c in colas:
         c.show()
+    print("update")
+    pygame.display.flip()
 
-
+conexion = ConectionServer(update)
 introScreen = font2.render("Esperando a que se conecten clientes", 1, "white")
 screen.blit(introScreen, (400,400))
 pygame.display.flip()
-while True:
-    conexion.loop(str(colaC)+str(colaP)+str(colaOB))
-
-    for client in conexion.broadcast_list:
-        conexion._listen_thread(client)
-    
-    for message in conexion.message_list:
-        colaALlamar = None
-        if message[1:] == "C":
-            colaALlamar = colas[0]
-        elif message[1:] == "P":
-            colaALlamar = colas[1]
-        else:
-            colaALlamar = colas[2]
-
-        if message[0] == "0":
-            colaALlamar.addTicket()
-        elif message[0] == "0":
-            colaALlamar.delTicket()
-        else:
-            colaALlamar.callTicket()
-        conexion.message_list.remove(message)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: 
-            cargar()
-            sys.exit()
-    
-    # if len(conexion.broadcast_list) <= 0:
-    #     sys.exit()
-    draw()
-    pygame.display.flip()
+conexion.loop(str(colaC)+str(colaP)+str(colaOB))
