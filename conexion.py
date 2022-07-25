@@ -11,7 +11,6 @@ class ConectionServer:
         self.ADDRESS = "0.0.0.0"
         self.broadcast_list = []
         self.my_socket.bind((self.ADDRESS, self.PORT))
-        self.message_list = []
         self.update = update
         self.alive = True
         # self.action0 = action0
@@ -53,8 +52,7 @@ class ConectionServer:
                 if str(message).rfind('@') >= 0:
                     print(f"New client: {str(message).removeprefix('@')}")
                     name = str(message).removeprefix('@')
-                else: 
-                    self.message_list.append(message)
+                elif message !="": 
                     self.update(message)
                     #print(self.message_list)
                     # if str(message).rfind('0') >= 0:

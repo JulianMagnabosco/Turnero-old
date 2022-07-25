@@ -1,3 +1,4 @@
+from email import message
 import pygame,sys,pickle,threading
 from conexion import ConectionServer
 from pygame.locals import *
@@ -108,18 +109,34 @@ Cola("P", 1, (0,155,0)),
 Cola("OB", 2, (155,0,0)))
 
 
-def update():
+def update(rawMessage):
+    pygame.display.flip()
+    message = str(rawMessage).strip("['']")
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             cargar()
             sys.exit()
     screen.fill((255,255,255))
+    if message != "":
+        if message[1:] == "C":
+            selectedCola = colas[0]
+        elif message[1:] == "P":
+            selectedCola = colas[1]
+        else :
+            selectedCola = colas[2]
 
+        if message[0] == "0":
+            selectedCola.addTicket()
+        elif message[0] == "1":
+            selectedCola.delTicket()
+        elif message[0] == "2":
+            selectedCola.callTicket()
+        print(colaC)
+    
     pygame.draw.rect(screen, (200,200,200), (0,0,screen.get_size()[0],100))
     
     for c in colas:
         c.show()
-    print("update")
     pygame.display.flip()
 
 conexion = ConectionServer(update)
