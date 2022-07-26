@@ -110,7 +110,6 @@ Cola("OB", 2, (155,0,0)))
 
 
 def update(rawMessage):
-    pygame.display.flip()
     message = str(rawMessage).strip("['']")
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
@@ -138,6 +137,7 @@ def update(rawMessage):
     for c in colas:
         c.show()
     pygame.display.flip()
+    return str(colaC)+str(colaP)+str(colaOB)
 
 conexion = ConectionServer(update)
 introScreen = font2.render("Esperando a que se conecten clientes", 1, "white")

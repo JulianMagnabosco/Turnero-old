@@ -21,7 +21,6 @@ for data in conn.data[1:-1].split(']['):
     except:
         dataRaw.append([])
 
-print(conn.data)
 colaC = list(dataRaw[0])
 colaP = list(dataRaw[1])
 colaOB = list(dataRaw[2])
@@ -141,7 +140,18 @@ def draw():
         c.show()
 
 while True:
-    print(conn.send(str(tasks)))
+    dataRaw.clear()
+    info = conn.send(str(tasks))
+    for data in info[1:-1].split(']['):
+        value = data.split(', ')
+        try:
+            dataRaw.append([int(x) for x in value])
+        except:
+            dataRaw.append([])
+    print(dataRaw)
+    colaC = list(dataRaw[0])
+    colaP = list(dataRaw[1])
+    colaOB = list(dataRaw[2])
     tasks.clear()
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 

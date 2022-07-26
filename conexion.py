@@ -1,8 +1,6 @@
-from concurrent.futures import thread
-from select import select
-import socket
+import socket,threading
 import sys
-import threading
+from turtle import update
 
 class ConectionServer:
     def __init__(self, update):
@@ -13,9 +11,7 @@ class ConectionServer:
         self.my_socket.bind((self.ADDRESS, self.PORT))
         self.update = update
         self.alive = True
-        # self.action0 = action0
-        # self.action1 = action1
-        # self.action2 = action2
+        self.data = ""
 
     def loop(self, data):
         while self.alive:
@@ -23,18 +19,24 @@ class ConectionServer:
 
 
     def _loop(self, data):
-        self.my_socket.listen()
-        client, client_address = self.my_socket.accept()
-        self.broadcast_list.append(client)
-        client.send(data.encode())
-        print("serchin")
-        self.start_listenning_thread(client)
-        # try:
-        #     self.client, self.client_address = self.my_socket.accept()
-        #     self.broadcast_list.append(self.client)
-        #     self.start_listenning_thread(self.client)
-        # except:
-        #     pass
+        # self.my_socket.listen()
+        # print("serchin")
+        # client, client_address = self.my_socket.accept()
+        # self.broadcast_list.append(client)
+        # client.send(data.encode())
+        # self.start_listenning_thread(client)
+        # self.my_socket.settimeout(0.1)
+        try:
+            self.my_socket.listen()
+            self.update("")
+            client, client_address = self.my_socket.accept()
+            self.broadcast_list.append(client)
+            client.send(data.encode())
+            self.data = data
+            self.start_listenning_thread(client)
+            self.my_socket.settimeout(0.1)
+        except:
+            pass
         
     def start_listenning_thread(self,client):
         self.client_thread = threading.Thread(
@@ -52,25 +54,20 @@ class ConectionServer:
                 if str(message).rfind('@') >= 0:
                     print(f"New client: {str(message).removeprefix('@')}")
                     name = str(message).removeprefix('@')
-                elif message !="": 
-                    self.update(message)
-                    #print(self.message_list)
-                    # if str(message).rfind('0') >= 0:
-                    #     self.action0(str(message).removeprefix('0'))
-                    # if str(message).rfind('1') >= 0:
-                    #     self.action1(str(message).removeprefix('1'))
-                    # if str(message).rfind('2') >= 0:
-                    #     self.action2(str(message).removeprefix('2'))
-                self.broadcast(message)
+                elif message !="[]": 
+                    self.data = self.update(message)
+                self.broadcast()
             else:
                 print(f"client has been disconnected : {name}")
-                self.broadcast(client)
+                if len(self.broadcast_list)-1 <= 0:
+                    self.alive = False
+                    self.my_socket.close()
                 return
         
-    def broadcast(self,message):
+    def broadcast(self):
         for client in self.broadcast_list:
             try:
-                client.send(message.encode())
+                client.send(self.data.encode())
             except:
                 self.broadcast_list.remove(client)
                 print(f"Client removed : {client}")
