@@ -3,7 +3,7 @@ import sys
 from turtle import update
 
 class ConectionServer:
-    def __init__(self, update):
+    def __init__(self, update, exit):
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.PORT = 8000
         self.ADDRESS = "0.0.0.0"
@@ -12,6 +12,7 @@ class ConectionServer:
         self.update = update
         self.alive = True
         self.data = ""
+        self.exit = exit
 
     def loop(self, data):
         while self.alive:
@@ -19,16 +20,9 @@ class ConectionServer:
 
 
     def _loop(self, data):
-        # self.my_socket.listen()
-        # print("serchin")
-        # client, client_address = self.my_socket.accept()
-        # self.broadcast_list.append(client)
-        # client.send(data.encode())
-        # self.start_listenning_thread(client)
-        # self.my_socket.settimeout(0.1)
         try:
             self.my_socket.listen()
-            self.update("")
+            if len(self.broadcast_list) > 0:self.update("")
             client, client_address = self.my_socket.accept()
             self.broadcast_list.append(client)
             client.send(data.encode())
@@ -60,6 +54,7 @@ class ConectionServer:
             else:
                 print(f"client has been disconnected : {name}")
                 if len(self.broadcast_list)-1 <= 0:
+                    self.exit()
                     self.alive = False
                     self.my_socket.close()
                 return
@@ -77,12 +72,12 @@ class ConectionServer:
                 
 
 class ConectionClient:
-    def __init__(self):
+    def __init__(self,address,port):
         self.nickname = "local"
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.host = "localhost" # "127.0.1.1"
-        self.port = 8000
-        self.my_socket.connect((self.host, self.port))
+        self.address = address# "127.0.1.1"
+        self.port = port
+        self.my_socket.connect((self.address, self.port))
         self.data = self.my_socket.recv(1024).decode()
         self.my_socket.send(f'@{self.nickname}'.encode())
 

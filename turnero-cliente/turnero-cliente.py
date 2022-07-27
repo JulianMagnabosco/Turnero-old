@@ -1,19 +1,33 @@
-import pygame,sys,pickle,threading,conexion
+import pygame,sys,pickle,threading
+from conection_client import ConectionClient
 from pygame.locals import *
 
 pygame.init()
 flags = pygame.RESIZABLE
 screen = pygame.display.set_mode((1024,720), flags)
-pygame.display.set_caption("contador")
+pygame.display.set_caption("Turnero cliente")
 
 sound = pygame.mixer.Sound("music.wav")
 font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
 font3 = pygame.font.SysFont("Arial", 30)
 
-conn = conexion.ConectionClient()
+address = "localhost"
+port = 8000
+lines = []
+with open('config.txt') as f:
+    lines = f.readlines()
+for l in lines:
+    startVar = l.find(" = ")
+    if startVar >= 1:
+        if l[:startVar] == "ADDRESS":
+            address = l[startVar+2:].strip()
+        if l[:startVar] == "PORT":
+            port = int(l[startVar+2:] )
+
+conn = ConectionClient(address,port)
 dataRaw = list()
-tasks = list()
+
 for data in conn.data[1:-1].split(']['):
     value = data.strip('][').split(', ')
     try:
@@ -24,6 +38,7 @@ for data in conn.data[1:-1].split(']['):
 colaC = list(dataRaw[0])
 colaP = list(dataRaw[1])
 colaOB = list(dataRaw[2])
+tasks = list()
 #clases
 class Button:
     def __init__(self, text, action, arg, bg="yellow"):
@@ -57,10 +72,13 @@ class Cola:
         self.color = color
         if cola == "C":
             self.cola = colaC
+            self.name = "Clinica"
         elif cola == "P":
             self.cola = colaP
+            self.name = "Pediatria"
         elif cola == "OB":
             self.cola = colaOB
+            self.name = "OB"
         self.buttonAdd = Button("Dar ticket",self.addTicket,cola)
         buttons.append(self.buttonAdd)
         self.buttonDel = Button("Quitar ticket",self.delTicket,cola)
@@ -76,7 +94,7 @@ class Cola:
         realPos = self.pos*screen.get_size()[0]/4
         firstRender = font2.render(str(len(self.cola))+" Turnos", 1, "black")
         screen.blit(firstRender, (realPos + (screen.get_size()[0]/4-firstRender.get_size()[0])/2 ,40))
-        firstRender = font2.render("Clinica", 1, "black")
+        firstRender = font2.render(self.name, 1, "black")
         screen.blit(firstRender, (realPos + (screen.get_size()[0]/4-firstRender.get_size()[0])/2 ,0))
 
         #turnos
@@ -121,7 +139,7 @@ class Cola:
             self.called += 1
             timer = threading.Timer(5,self._callTicket)
             timer.start()
-            tasks.append("3"+nomCola)
+            tasks.append("2"+nomCola)
             pygame.mixer.stop()
             pygame.mixer.Sound.play(sound)
 #metodos

@@ -1,12 +1,14 @@
-from email import message
 import pygame,sys,pickle,threading
-from conexion import ConectionServer
+from conection_server import ConectionServer
 from pygame.locals import *
 
 pygame.init()
-flags = pygame.RESIZABLE
-screen = pygame.display.set_mode((1024,720), flags)
-pygame.display.set_caption("contador")
+flags = pygame.RESIZABLE 
+info = pygame.display.Info()
+w = 1024
+h = 800
+screen = pygame.display.set_mode((w,h), flags)
+pygame.display.set_caption("Turnero Principal")
 
 sound = pygame.mixer.Sound("music.wav")
 font1 = pygame.font.SysFont("Arial", 100)
@@ -48,10 +50,13 @@ class Cola:
         self.color = color
         if cola == "C":
             self.cola = colaC
+            self.name = "Clinica"
         elif cola == "P":
             self.cola = colaP
+            self.name = "Pediatria"
         elif cola == "OB":
             self.cola = colaOB
+            self.name = "OB"
         self.called = False
 
     def show(self):
@@ -61,7 +66,7 @@ class Cola:
         realPos = self.pos*screen.get_size()[0]/4
         firstRender = font2.render(str(len(self.cola))+" Turnos", 1, "black")
         screen.blit(firstRender, (realPos + (screen.get_size()[0]/4-firstRender.get_size()[0])/2 ,40))
-        firstRender = font2.render("Clinica", 1, "black")
+        firstRender = font2.render(self.name, 1, "black")
         screen.blit(firstRender, (realPos + (screen.get_size()[0]/4-firstRender.get_size()[0])/2 ,0))
 
         #turnos
@@ -130,7 +135,7 @@ def update(rawMessage):
             selectedCola.delTicket()
         elif message[0] == "2":
             selectedCola.callTicket()
-        print(colaC)
+        print(message)
     
     pygame.draw.rect(screen, (200,200,200), (0,0,screen.get_size()[0],100))
     
@@ -139,7 +144,7 @@ def update(rawMessage):
     pygame.display.flip()
     return str(colaC)+str(colaP)+str(colaOB)
 
-conexion = ConectionServer(update)
+conexion = ConectionServer(update,cargar)
 introScreen = font2.render("Esperando a que se conecten clientes", 1, "white")
 screen.blit(introScreen, (400,400))
 pygame.display.flip()
