@@ -15,7 +15,7 @@ font3 = pygame.font.SysFont("Arial", 30)
 address = "localhost"
 port = 8000
 lines = []
-with open('config.txt') as f:
+with open('./config.txt') as f:
     lines = f.readlines()
 for l in lines:
     startVar = l.find(" = ")

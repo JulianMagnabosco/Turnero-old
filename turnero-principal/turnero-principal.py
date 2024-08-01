@@ -10,7 +10,7 @@ h = 800
 screen = pygame.display.set_mode((w,h), flags)
 pygame.display.set_caption("Turnero Principal")
 
-sound = pygame.mixer.Sound("music.wav")
+sound = pygame.mixer.Sound("./music.wav")
 font1 = pygame.font.SysFont("Arial", 100)
 font2 = pygame.font.SysFont("Arial", 50)
 font3 = pygame.font.SysFont("Arial", 30)
