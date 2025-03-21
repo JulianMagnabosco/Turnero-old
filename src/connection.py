@@ -1,24 +1,24 @@
 import socket,threading
 
 
-class ConectionServer:
-    def __init__(self, update, exit):
+class ConnectionServer:
+    def __init__(self, updateFunction, exit):
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.PORT = 8000
         self.ADDRESS = "0.0.0.0"
         self.broadcast_list = []
         self.my_socket.bind((self.ADDRESS, self.PORT))
-        self.update = update
-        self.alive = True
+        self.update = updateFunction
+        self.running = True
         self.data = ""
         self.exit = exit
 
+    def start(self, data):
+        while self.running:
+            self.loop(data)
+
+
     def loop(self, data):
-        while self.alive:
-            self._loop(data)
-
-
-    def _loop(self, data):
         try:
             self.my_socket.listen()
             if len(self.broadcast_list) > 0:self.update("")
@@ -41,7 +41,7 @@ class ConectionServer:
 
     def listen_thread(self,client):
         name = ""
-        while self.alive:
+        while self.running:
             message = client.recv(1024).decode()
             if message:
                 if str(message).rfind('@') >= 0:
@@ -54,7 +54,7 @@ class ConectionServer:
                 print(f"client has been disconnected : {name}")
                 if len(self.broadcast_list)-1 <= 0:
                     self.exit()
-                    self.alive = False
+                    self.running = False
                     self.my_socket.close()
                 return
         
@@ -66,6 +66,21 @@ class ConectionServer:
                 self.broadcast_list.remove(client)
                 print(f"Client removed : {client}")
         if len(self.broadcast_list) <= 0:
-            self.alive = False
+            self.running = False
             self.my_socket.close()
                 
+
+class ConnectionClient:
+    def __init__(self,address,port):
+        self.nickname = "local"
+        self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.address = address# "127.0.1.1"
+        self.port = port
+        self.my_socket.connect((self.address, self.port))
+        self.data = self.my_socket.recv(1024).decode()
+        self.my_socket.send(f'@{self.nickname}'.encode())
+
+    def send(self,message):
+        self.my_socket.send(message.encode())
+        return self.my_socket.recv(1024).decode()
+        
