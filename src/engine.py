@@ -1,32 +1,32 @@
 import pygame
 from pygame.locals import *
 
-def setup():
-        # pygame setup
-    pygame.init()
-    
-    screen = pygame.display.set_mode((1280, 720))
-    clock = pygame.time.Clock()
-    running = True
+class Screen:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((1280, 720))
+        self.lines=[]
+        self.buttons=[]
+        self.running = True
+        self.clock = pygame.time.Clock()
 
-    while running:
-        # poll for events
-        # pygame.QUIT event means the user clicked X to close your window
+    def start(self):
+        # pygame setup
+        while self.running:
+            self.draw()
+        pygame.quit()
+
+    def draw(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                    self.running = False
 
-        # fill the screen with a color to wipe away anything from last frame
-        screen.fill("purple")
+            # fill the screen with a color to wipe away anything from last frame
+        self.screen.fill("white")
 
-        # RENDER YOUR GAME HERE
+        pygame.display.flip() # RENDER YOUR GAME HERE
+        self.clock.tick(60)  # limits FPS to 60
 
-        # flip() the display to put your work on screen
-        pygame.display.flip()
-
-        clock.tick(60)  # limits FPS to 60
-
-    pygame.quit()
 
 class Button:
     def __init__(self,screen,font, text, action, actionArgs, bg="yellow"):
@@ -114,26 +114,3 @@ class Line:
         self.buttonAdd.show(5+realPos, self.screen.get_size()[1]-firstRender.get_size()[1]*3)
         self.buttonDel.show(5+realPos, self.screen.get_size()[1]-firstRender.get_size()[1]*2)
         self.buttonCall.show(5+realPos, self.screen.get_size()[1]-firstRender.get_size()[1])
-
-    def addTicket (self,nomCola):
-        if len(self.line) > 0:
-            self.line.append(self.line[-1]+1)
-            self.tasks.append("0"+nomCola)
-
-    def delTicket (self,nomCola):
-        if len(self.line) > 0:
-            self.line.pop(len(self.line)-1)
-            self.tasks.append("1"+nomCola)
-
-    def _callTicket (self):
-        self.line.pop(0)
-        self.called -= 1
-    
-    def callTicket (self,nomCola):
-        if len(self.line) > 0:
-            self.called += 1
-            timer = self.threading.Timer(5,self._callTicket)
-            timer.start()
-            self.tasks.append("2"+nomCola)
-            pygame.mixer.stop()
-            pygame.mixer.Sound.play(self.sound)
