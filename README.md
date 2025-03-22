@@ -1,8 +1,5 @@
-# Cliente
-`python turnero-cliente/turnero-cliente.py`
-
-# Servidor
-`python turnero-principal/turnero-principal.py`
-
-# Test
-`python display.py`
+# Turnero
+## Necesario
+- Python 3.13.1 
+## Ejecutar
+`python src/main.py`
